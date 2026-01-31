@@ -119,6 +119,7 @@ async function chatStream(
 									out = JSON.stringify(parsed.text);
 								}
 							} else {
+								// Pass through other objects (like {token}, {conversationId}) as JSON strings
 								out = JSON.stringify(parsed);
 							}
 							onMessage?.(out);
@@ -152,6 +153,7 @@ async function chatStream(
 							else if (parsed.text?.content) out = String(parsed.text.content);
 							else out = JSON.stringify(parsed.text);
 						} else {
+							// Pass through other objects (like {token}, {conversationId}) as JSON strings
 							out = JSON.stringify(parsed);
 						}
 						onMessage?.(out);
@@ -177,6 +179,84 @@ export const agentService = {
 	deleteAgent,
 	testAgent,
 	chatStream,
+	createCrossReply,
+	getCrossReplies,
+	getCrossReplyById,
+	addAgentResponse,
+	deleteCrossReply,
 };
 
+/**
+ * Create a cross-agent reply session
+ * Takes a message the user liked and wants other agents to answer
+ */
+async function createCrossReply(payload: any): Promise<any> {
+	const res = await api.post('/agents/cross-replies', payload);
+	return res.data.data;
+}
+
+/**
+ * Get all cross-reply sessions for the user
+ */
+async function getCrossReplies(): Promise<any[]> {
+	const res = await api.get('/agents/cross-replies');
+	return res.data.data;
+}
+
+/**
+ * Get a specific cross-reply session with all responses
+ */
+async function getCrossReplyById(crossReplyId: string): Promise<any> {
+	const res = await api.get(`/agents/cross-replies/${crossReplyId}`);
+	return res.data.data;
+}
+
+/**
+ * Add an agent's response to a cross-reply session
+ * Called after an agent has answered the question
+ */
+async function addAgentResponse(
+	crossReplyId: string,
+	payload: { agentId: string; conversationId: string; responseMessageId: string }
+): Promise<any> {
+	const res = await api.post(`/agents/cross-replies/${crossReplyId}/responses`, payload);
+	return res.data.data;
+}
+
+/**
+ * Delete a cross-reply session
+ */
+async function deleteCrossReply(crossReplyId: string): Promise<boolean> {
+	const res = await api.delete(`/agents/cross-replies/${crossReplyId}`);
+	return res.data.success === true;
+}
+
 export default agentService;
+
+
+
+export async function recordFeedback(messageId: string, feedback: 'like' | 'dislike'): Promise<{ feedback: number }> {
+    const response = await api.post('/conversations/feedback', { messageId, feedback });
+    return response.data.data;
+}
+
+export async function getLatestConversation(agentId: string): Promise<any> {
+    try {
+        const response = await api.get(`/conversations/latest/${agentId}`);
+        // Backend returns { success: true, data: { id, messages[], ... } }
+        const conv = response.data?.data;
+        if (!conv || !conv.id) {
+            console.log('No latest conversation found for agent:', agentId);
+            return null;
+        }
+        return conv;
+    } catch (err) {
+        console.log('No latest conversation found for agent:', agentId);
+        return null;
+    }
+}
+
+export const conversationService = {
+    recordFeedback,
+    getLatestConversation,
+};
