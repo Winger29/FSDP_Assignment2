@@ -45,7 +45,10 @@ class AgentService {
       .single();
     
     if (error) {
-      logger.error('Error fetching agent:', error);
+      // Only log if it's not a "not found" error
+      if (error.code !== 'PGRST116') {
+        logger.error('Error fetching agent:', error);
+      }
       return null;
     }
     return data;
