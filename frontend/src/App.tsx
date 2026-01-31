@@ -30,6 +30,7 @@ import SearchPage from './pages/SearchPage';
 import RequestsPage from './pages/RequestsPage';
 import UserResourcesPage from './pages/UserResourcesPage';
 import FeedbackDetail from './pages/FeedbackDetail';
+import Collab from './pages/CollabMsg';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -146,6 +147,10 @@ function App() {
         <Route 
           path="/" 
           element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} 
+        />
+        <Route 
+          path="/Collab" 
+          element={isAuthenticated ? <Collab /> : <Navigate to="/login" />} 
         />
         <Route
           path="*"

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bot } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { GoogleLogin } from '@react-oauth/google';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -38,6 +39,31 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+    const handleGoogleSuccess = async (credentialResponse: any) => {
+  try {
+    setError('');
+    setLoading(true);
+
+    const { data, error } = await supabase.auth.signInWithIdToken({
+      provider: 'google',
+      token: credentialResponse.credential,
+    });
+
+    if (error) throw error;
+
+    if (data.session) {
+      localStorage.setItem('token', data.session.access_token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      window.location.href = '/dashboard';
+    }
+  } catch (err: any) {
+    setError(err.message || 'Google login failed');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -87,6 +113,16 @@ export default function Login() {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+        <div className="mt-6 flex justify-center">
+          <div className="w-full max-w-md">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError('Google login failed')}
+              width="1000"
+            />
+          </div>
+        </div>
+
 
         <p className="text-center text-gray-600 mt-6">
           Don't have an account? <Link to="/register" className="text-blue-600 hover:underline">Sign up</Link>

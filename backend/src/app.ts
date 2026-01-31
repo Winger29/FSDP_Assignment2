@@ -13,6 +13,10 @@ import { analyticsRoutes } from "./routes/analyticsRoutes";
 import { teamRoutes } from "./routes/teamRoutes";
 import { uploadRoutes } from "./routes/uploadRoutes";
 import { shareRoutes } from "./routes/shareRoutes";
+import{ groupRoutes } from './routes/groupRoute';
+import { groupAgentRoute } from './routes/groupAgentRoute';
+
+
 
 import { errorHandler } from "./middleware/errorHandler";
 import { connectDatabase } from "./config/database";
@@ -185,6 +189,8 @@ app.use("/api/research", researchRoutes);
 app.use("/api/teams", teamRoutes);
 app.use("/api", shareRoutes);
 app.use("/api/uploads", uploadRoutes);
+app.use("/api/group", groupRoutes);
+app.use("/api/group-agent", groupAgentRoute);
 
 // ======================================================
 // ❌ 404 HANDLER

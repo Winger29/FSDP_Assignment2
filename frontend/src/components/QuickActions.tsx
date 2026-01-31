@@ -5,7 +5,8 @@ type Props = {
   onTestAgent: () => void;
   onViewAnalytics: () => void;
   onFeedback: () => void;
-  onProfile: () => void; // <-- new
+  onProfile: () => void; 
+  onCollab: () => void;
 };
 
 export default function QuickActions({
@@ -13,7 +14,8 @@ export default function QuickActions({
   onTestAgent,
   onViewAnalytics,
   onFeedback,
-  onProfile, // <-- new
+  onProfile, 
+  onCollab,
 }: Props) {
   const actions = [
     {
@@ -51,6 +53,13 @@ export default function QuickActions({
       onClick: onProfile,
       color: 'bg-teal-600', // choose a new color so it stands out
     },
+        {
+      name: 'Collaborate',
+      description: 'Work with team members on agents',
+      icon: MessageSquare,
+      onClick: onCollab,
+      color: 'bg-red-600',
+    }
   ];
 
   return (

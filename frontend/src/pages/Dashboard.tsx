@@ -202,6 +202,8 @@ export default function Dashboard() {
           onViewAnalytics={() => navigate('/analytics')}
           onFeedback={() => navigate('/feedback')}
           onProfile={() => navigate('/profile')}
+          onCollab={() => navigate('/collab')}
+
         />
 
         {/* Search and Filters */}
