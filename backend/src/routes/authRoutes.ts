@@ -255,4 +255,54 @@ router.post("/sync-users-from-auth", async (req, res) => {
   }
 });
 
+/**
+ * GET /api/auth/me - Get current user info
+ */
+router.get("/me", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ success: false, error: "No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+      return res.status(401).json({ success: false, error: "Invalid token" });
+    }
+
+    // Get user data from public.users table
+    const { data: userData, error: dbError } = await supabase
+      .from('users')
+      .select('id, email, name')
+      .eq('id', user.id)
+      .single();
+
+    if (dbError) {
+      logger.error("Failed to fetch user data:", dbError);
+      return res.json({
+        success: true,
+        data: {
+          id: user.id,
+          email: user.email,
+          name: user.user_metadata?.full_name || user.email?.split("@")[0],
+        },
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        id: userData.id,
+        email: userData.email,
+        name: userData.name,
+      },
+    });
+  } catch (error) {
+    logger.error("Get user error:", error);
+    res.status(500).json({ success: false, error: "Failed to get user data" });
+  }
+});
+
 export const authRoutes = router;

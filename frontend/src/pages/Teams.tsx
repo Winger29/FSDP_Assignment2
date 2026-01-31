@@ -13,13 +13,14 @@ export default function Teams() {
     queryFn: teamService.getTeams,
   });
 
-  // Fetch shared resources and filter for tasks only
+  // Fetch shared resources and filter for tasks and teams
   const { data: sharedResources = [] } = useQuery({
     queryKey: ['sharedResources'],
     queryFn: shareService.getSharedResources,
   });
 
   const sharedTasks = sharedResources.filter((r: any) => r.resourceType === 'task');
+  const sharedTeams = sharedResources.filter((r: any) => r.resourceType === 'team');
 
   if (isLoading) {
     return (
@@ -155,6 +156,49 @@ export default function Teams() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Shared Teams Section */}
+        {sharedTeams.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+              <Users className="h-6 w-6 text-green-600" />
+              Shared Teams
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {sharedTeams.map((team: any) => (
+                <div
+                  key={team.resourceId}
+                  onClick={() => navigate(`/teams/${team.resourceId}`)}
+                  className="bg-white rounded-lg shadow-sm hover:shadow-md transition cursor-pointer p-6 border-l-4 border-green-500"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="font-semibold text-lg text-gray-900 line-clamp-1">
+                      {team.resourceName}
+                    </h3>
+                    <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">
+                        SHARED TEAM
+                      </span>
+                      <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                        {team.role || 'Viewer'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      Owner: {team.ownerName}
+                    </p>
+                    <div className="flex items-center gap-1 text-xs text-gray-500 pt-2 border-t">
+                      <Calendar className="h-3 w-3" />
+                      Shared {new Date(team.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
