@@ -131,30 +131,41 @@ class TeamService {
       const isOwner = team.user_id === userId;
 
       if (!isOwner) {
-        // Check for shared access - find agents owned by team owner that are shared with current user
-        const { data: ownerAgents } = await supabase
-          .from('agents')
+        // Check for shared team access in resource_access table
+        const { data: teamAccess } = await supabase
+          .from('resource_access')
           .select('id')
-          .eq('user_id', team.user_id);
+          .eq('resource_type', 'team')
+          .eq('resource_id', teamId)
+          .eq('user_id', userId)
+          .maybeSingle();
 
-        if (ownerAgents && ownerAgents.length > 0) {
-          const agentIds = ownerAgents.map(a => a.id);
-          
-          const { data: sharedAccess } = await supabase
-            .from('share_requests')
+        if (!teamAccess) {
+          // Also check for shared agent access (old logic)
+          const { data: ownerAgents } = await supabase
+            .from('agents')
             .select('id')
-            .eq('resource_type', 'agent')
-            .in('resource_id', agentIds)
-            .eq('requester_user_id', userId)
-            .eq('status', 'approved')
-            .limit(1)
-            .maybeSingle();
+            .eq('user_id', team.user_id);
 
-          if (!sharedAccess) {
+          if (ownerAgents && ownerAgents.length > 0) {
+            const agentIds = ownerAgents.map(a => a.id);
+            
+            const { data: sharedAccess } = await supabase
+              .from('share_requests')
+              .select('id')
+              .eq('resource_type', 'agent')
+              .in('resource_id', agentIds)
+              .eq('requester_user_id', userId)
+              .eq('status', 'approved')
+              .limit(1)
+              .maybeSingle();
+
+            if (!sharedAccess) {
+              throw new Error("Team not found");
+            }
+          } else {
             throw new Error("Team not found");
           }
-        } else {
-          throw new Error("Team not found");
         }
       }
 
