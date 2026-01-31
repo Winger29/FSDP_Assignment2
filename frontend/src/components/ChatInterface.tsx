@@ -55,6 +55,15 @@ export default function ChatInterface({ agentId, conversationId, onConversationC
 		},
 	});
 
+	// Fetch all agents for SaveResponseButton dropdown
+	const { data: allAgents = [] } = useQuery<Agent[]>({
+		queryKey: ['agents'],
+		queryFn: async () => {
+			const response = await api.get('/agents');
+			return response.data.data || [];
+		},
+	});
+
 	const isAgentAvailable = agent?.status === 'ACTIVE' || agent?.status === 'TRAINING';
 
 	const assistantBufferRef = useRef<string>('');
@@ -454,6 +463,14 @@ export default function ChatInterface({ agentId, conversationId, onConversationC
 								className={`h-4 w-4 ${msg.feedback === 'dislike' ? 'opacity-100' : 'opacity-40 hover:opacity-70'}`}
 							/>
 						</button>
+						<SaveResponseButton
+							messageId={msg.id}
+							messageContent={msg.content}
+							currentAgentId={agentId}
+							currentConversationId={currentConversationId || ''}
+							allAgents={allAgents.map(a => ({ id: a.id, name: a.name }))}
+							questionText={messages.find(m => m.role === 'user' && messages.indexOf(m) < messages.indexOf(msg))?.content || 'User Query'}
+						/>
 						<SaveResponseButton
 							messageId={msg.id}
 							messageContent={msg.content}
