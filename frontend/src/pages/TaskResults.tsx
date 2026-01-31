@@ -78,11 +78,13 @@ export default function TaskResults() {
 
       // Upload files if any
       if (versionFiles.length > 0) {
-        const formData = new FormData();
-        versionFiles.forEach((file) => formData.append('files', file));
-        await api.post(`/uploads/tasks/${newTask.id}`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+        for (const file of versionFiles) {
+          const formData = new FormData();
+          formData.append('file', file);
+          await api.post(`/uploads/tasks/${newTask.id}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+        }
       }
 
       return newTask;

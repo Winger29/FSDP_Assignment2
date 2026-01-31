@@ -54,18 +54,18 @@ router.post(
 // Upload file for task
 router.post(
   "/tasks/:taskId",
-  upload.array("files", 10),
+  upload.single("file"),
   async (req: Request, res: Response): Promise<void> => {
     try {
       const { taskId } = req.params;
-      const userId = (req as any).user?.id;
-      const files = req.files as Express.Multer.File[];
+      const userId = (req as any).user?.id; // Changed from userId to id
+      const file = req.file;
 
-      logger.info(`Task upload request: taskId=${taskId}, userId=${userId}, files=${files?.length || 0}`);
+      logger.info(`Task upload request: taskId=${taskId}, userId=${userId}, file=${file?.originalname}`);
 
-      if (!files || files.length === 0) {
-        logger.warn("No files in upload request");
-        res.status(400).json({ error: "No files uploaded" });
+      if (!file) {
+        logger.warn("No file in upload request");
+        res.status(400).json({ error: "No file uploaded" });
         return;
       }
 
@@ -75,29 +75,26 @@ router.post(
         return;
       }
 
-      const attachments = [];
-      for (const file of files) {
-        // Validate file
-        const validation = uploadService.validateFile(file);
-        if (!validation.valid) {
-          logger.warn(`File validation failed: ${validation.error}`);
-          continue;
-        }
-
-        logger.info(`Saving task attachment: ${file.originalname}`);
-        // Save attachment
-        const attachment = await uploadService.saveTaskAttachment(
-          taskId,
-          userId,
-          file
-        );
-        attachments.push(attachment);
+      // Validate file
+      const validation = uploadService.validateFile(file);
+      if (!validation.valid) {
+        logger.warn(`File validation failed: ${validation.error}`);
+        res.status(400).json({ error: validation.error });
+        return;
       }
 
-      logger.info(`Task attachments saved successfully: ${attachments.length}`);
+      logger.info(`Saving task attachment: ${file.originalname}`);
+      // Save attachment
+      const attachment = await uploadService.saveTaskAttachment(
+        taskId,
+        userId,
+        file
+      );
+
+      logger.info(`Task attachment saved successfully: ${attachment.id}`);
       res.json({
         success: true,
-        data: attachments,
+        data: attachment,
       });
     } catch (error: any) {
       console.error("Upload error:", error);

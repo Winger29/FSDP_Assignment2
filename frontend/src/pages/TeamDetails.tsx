@@ -60,9 +60,7 @@ export default function TeamDetails() {
         for (const filePreview of taskFiles) {
           try {
             const formData = new FormData();
-            formData.append('file', filePreview.file);
-            
-            console.log(`Uploading ${filePreview.file.name} to /uploads/tasks/${taskId}`);
+              formData.append('file', filePreview.file);
             const uploadResponse = await api.post(`/uploads/tasks/${taskId}`, formData, {
               headers: {
                 'Content-Type': 'multipart/form-data',
