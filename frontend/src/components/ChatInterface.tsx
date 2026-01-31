@@ -55,15 +55,6 @@ export default function ChatInterface({ agentId, conversationId, onConversationC
 		},
 	});
 
-	// Fetch all agents for SaveResponseButton dropdown
-	const { data: allAgents = [] } = useQuery<Agent[]>({
-		queryKey: ['agents'],
-		queryFn: async () => {
-			const response = await api.get('/agents');
-			return response.data.data || [];
-		},
-	});
-
 	const isAgentAvailable = agent?.status === 'ACTIVE' || agent?.status === 'TRAINING';
 
 	const assistantBufferRef = useRef<string>('');
