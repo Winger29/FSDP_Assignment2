@@ -132,7 +132,7 @@ router.get("/:id", async (req, res) => {
 
     if (!userId) return res.status(401).json({ success: false, error: "Unauthorized" });
 
-    // Fetch conversation and agent in one go
+    // Fetch conversation (don't filter by user_id yet - will check agent access below)
     const { data: conv, error: convErr } = await supabase
       .from('conversations')
       .select(`
@@ -140,7 +140,6 @@ router.get("/:id", async (req, res) => {
         agent:agents (id, name, avatar)
       `)
       .eq('id', id)
-      .eq('user_id', userId)
       .single();
 
     if (convErr || !conv) {
