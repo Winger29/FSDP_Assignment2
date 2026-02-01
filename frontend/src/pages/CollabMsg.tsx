@@ -137,6 +137,13 @@ useEffect(() => {
   loadAgents();
 }, []);
 
+useEffect(() => {
+  if (!selectedGroupId) {
+    setMessages([]);
+  }
+}, [selectedGroupId]);
+
+
   /* --------------------------
      Handlers
   -------------------------- */
