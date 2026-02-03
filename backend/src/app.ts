@@ -42,13 +42,14 @@ app.use(
 // CORS
 app.use(
   cors({
-    origin: ["https://snecked-uncollectively-bridgett.ngrok-free.dev"],
+    origin: ["https://snecked-uncollectively-bridgett.ngrok-free.dev","localhost:5173","https://fsdp-assignment2-9hwi.vercel.app"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH","OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
+app.options("*", cors());
 // Disable compression for SSE routes (chat streaming)
 app.use((req, res, next) => {
   if (req.path.includes("/chat")) return next();
