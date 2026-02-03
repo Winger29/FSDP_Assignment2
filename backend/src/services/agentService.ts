@@ -549,6 +549,7 @@ class AgentService {
   // ---------------------------------------------------
 
   async deleteAgent(agentId: string, userId: string) {
+    // Soft delete the agent
     const { data, error } = await supabase
       .from('agents')
       .update({ is_deleted: true })
@@ -558,6 +559,14 @@ class AgentService {
       .single();
     
     if (error) return null;
+    
+    // Delete all resource_access entries for this agent
+    await supabase
+      .from('resource_access')
+      .delete()
+      .eq('resource_type', 'agent')
+      .eq('resource_id', agentId);
+    
     return data;
   }
 }

@@ -325,6 +325,13 @@ class TeamService {
 
       if (updateError) throw updateError;
 
+      // Delete all resource_access entries for this team
+      await supabase
+        .from('resource_access')
+        .delete()
+        .eq('resource_type', 'team')
+        .eq('resource_id', teamId);
+
       logger.info(`Team archived: ${teamId}`);
     } catch (error) {
       logger.error("Delete team error:", error);
