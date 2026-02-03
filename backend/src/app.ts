@@ -49,7 +49,14 @@ app.use(
   })
 );
 
-app.options("*", cors());
+
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+  next();
+});
+
 // Disable compression for SSE routes (chat streaming)
 app.use((req, res, next) => {
   if (req.path.includes("/chat")) return next();
